@@ -1,11 +1,11 @@
 package com.scaler.controllers;
 
+import com.scaler.dtos.FakeStoreProductDto;
 import com.scaler.models.Product;
+import com.scaler.services.FakeStoreProductService;
 import com.scaler.services.ProductService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,10 +14,12 @@ import java.util.List;
 //localhost:8080/products request will reach here
 @RequestMapping("/product")
 public class ProductController {
+    private final RestTemplate restTemplate;
     ProductService productService;
     //constructor of product service
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, RestTemplate restTemplate) {
         this.productService = productService;
+        this.restTemplate = restTemplate;
     }
     //function of productController
     @GetMapping("/{id}")
@@ -26,10 +28,14 @@ public class ProductController {
     }
     @GetMapping()
     public List<Product> getAllProduct(){
-        return new ArrayList<Product>();
+        return productService.getAllProducts();
     }
     //create Product
     //delete Product
     //update Product->partial update (PATCH)
+    @PutMapping("/{id}")
+    public Product replaceProduct(@PathVariable("id") Long id, @RequestBody Product product){
+        return productService.replaceProduct(id, product);
+    }
     //replace Product->replace (PUT)
 }

@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 //class object recieved by ProductService method as response. while using restTemplate object method.
+//jackson library converts json code to object. but we need to give dto object to store response
 @Getter
 @Setter
 public class FakeStoreProductDto {
