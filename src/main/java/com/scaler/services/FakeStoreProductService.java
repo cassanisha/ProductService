@@ -68,15 +68,43 @@ public class FakeStoreProductService implements ProductService {
     //we are using low level function from restTemplate and changing the arguments to get non void function.
     @Override
     public Product replaceProduct(Long id, Product product) {
-        FakeStoreProductDto fakeStoreProductDto=new FakeStoreProductDto();
+        FakeStoreProductDto fakeStoreProductDto = new FakeStoreProductDto();
         fakeStoreProductDto.setTitle(product.getTitle());
         fakeStoreProductDto.setDescription(product.getDescription());
         fakeStoreProductDto.setImageUrl(product.getImageUrl());
+        fakeStoreProductDto.setPrice(product.getPrice());
+        fakeStoreProductDto.setCategory(product.getCategory().getDesc());
 
         RequestCallback requestCallback = restTemplate.httpEntityCallback(fakeStoreProductDto, FakeStoreProductDto.class);
         HttpMessageConverterExtractor<FakeStoreProductDto> responseExtractor = new HttpMessageConverterExtractor<>( FakeStoreProductDto.class, restTemplate.getMessageConverters());
-        FakeStoreProductDto response=restTemplate.execute("https://fakestoreapi.com/products"+id, HttpMethod.PUT, requestCallback, responseExtractor);
+        FakeStoreProductDto response=restTemplate.execute("https://fakestoreapi.com/products/"+id, HttpMethod.PUT, requestCallback, responseExtractor);
         if( response == null )return null;
         return convertFakeStoreProductDtoToProduct(response);
+    }
+
+    @Override
+    public Product createProduct(Product product) {
+        FakeStoreProductDto fakeStoreProductDto = new FakeStoreProductDto();
+        fakeStoreProductDto.setTitle(product.getTitle());
+        fakeStoreProductDto.setDescription(product.getDescription());
+        fakeStoreProductDto.setImageUrl(product.getImageUrl());
+        fakeStoreProductDto.setPrice(product.getPrice());
+        fakeStoreProductDto.setCategory(product.getCategory().getDesc());
+
+        FakeStoreProductDto createdProductDto = restTemplate.postForObject("https://fakestoreapi.com/products", fakeStoreProductDto, FakeStoreProductDto.class);
+        if (createdProductDto == null) return null;
+        return convertFakeStoreProductDtoToProduct(createdProductDto);
+
+    }
+
+    @Override
+    public boolean deleteProductById(Long id) {
+        try {
+            restTemplate.delete("https://fakestoreapi.com/products/" + id);
+            return true; // Successfully deleted
+        } catch (Exception e) {
+            // Handle any exceptions or errors (e.g., product not found)
+            return false; // Deletion failed
+        }
     }
 }

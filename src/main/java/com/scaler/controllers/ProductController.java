@@ -48,11 +48,33 @@ public class ProductController {
     }
 
     @GetMapping()
-    public List<Product> getAllProduct(){
-        return productService.getAllProducts();
+    public ResponseEntity<List<Product>>getAllProduct(){
+        List<Product> products = productService.getAllProducts();
+        if( products.isEmpty() ){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        else return new ResponseEntity<>(products, HttpStatus.OK);
     }
+
     //create Product
+    @PostMapping
+    public ResponseEntity<Product> createProduct(@RequestBody Product product){
+        Product createdproduct= productService.createProduct( product );
+        if( createdproduct == null ){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        else return new ResponseEntity<>(createdproduct, HttpStatus.CREATED);
+    }
     //delete Product
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Product> deleteProduct(@PathVariable("id") Long id){
+        boolean isDeleted = productService.deleteProductById(id);
+        if( !isDeleted ){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        else return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+
+    }
     //update Product->partial update (PATCH)
     @PutMapping("/{id}")
     public Product replaceProduct(@PathVariable("id") Long id, @RequestBody Product product){

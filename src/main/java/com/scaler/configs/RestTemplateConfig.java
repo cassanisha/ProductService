@@ -15,6 +15,7 @@ public class RestTemplateConfig {
     //annotation to specially make a bean out of class
     @Bean //please create a bean out of the return type of this method and store it inside the container for reuse.
     public RestTemplate restTemplate() {
+        // return new RestTemplate not used as builder class gives additional timeout methods, header classes
         return new RestTemplateBuilder().build();
     }
 
