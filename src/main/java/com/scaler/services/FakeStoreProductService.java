@@ -1,6 +1,7 @@
 package com.scaler.services;
 import com.scaler.configs.RestTemplateConfig;
 import com.scaler.dtos.FakeStoreProductDto;
+import com.scaler.exceptions.ProductNotFoundException;
 import com.scaler.models.Category;
 import com.scaler.models.Product;
 import org.springframework.http.HttpMethod;
@@ -42,13 +43,16 @@ public class FakeStoreProductService implements ProductService {
     // in its superclass or interface
 
     @Override
-    public Product getProductById(Long id) {
+    public Product getProductById(Long id) throws ProductNotFoundException {
         //Fakestore API will send a response in JSON. Here category class will be in string. DTO used
         //to recieve data from client to controller
         //to send data from controller to client
+
         FakeStoreProductDto fsd=restTemplate.getForObject("https://fakestoreapi.com/products/" + id, FakeStoreProductDto.class);
         //we are getting object as response where category is string. we want it to be an object.
-        if( fsd==null )return null;
+        if( fsd==null ){
+            throw new ProductNotFoundException(id,  "Product with id: "+id+" not found." );
+        }
         return convertFakeStoreProductDtoToProduct(fsd);
     }
 

@@ -1,4 +1,5 @@
 package com.scaler.services;
+import com.scaler.exceptions.ProductNotFoundException;
 import com.scaler.models.Product;
 import org.springframework.stereotype.Service;
 
@@ -6,7 +7,7 @@ import java.util.List;
 
 @Service
 public interface ProductService {
-    Product getProductById( Long id );
+    Product getProductById( Long id ) throws ProductNotFoundException;
     List<Product> getAllProducts();
     //3
     //FakestorePSDTO not given in args in place of product. Product ko convert krenge

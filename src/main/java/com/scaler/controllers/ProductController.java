@@ -1,6 +1,7 @@
 package com.scaler.controllers;
 
 import com.scaler.dtos.FakeStoreProductDto;
+import com.scaler.exceptions.ProductNotFoundException;
 import com.scaler.models.Product;
 import com.scaler.services.FakeStoreProductService;
 import com.scaler.services.ProductService;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,16 +35,19 @@ public class ProductController {
     //*********
     //ResponseEntity is a generic class that contains T type parameter, status codes, header files etc etc.
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable("id") Long id){
+    public ResponseEntity<Product> getProductById(@PathVariable("id") Long id) throws ProductNotFoundException {
         Product product=productService.getProductById(id); //method of productService
         //declaring the generic class
         ResponseEntity<Product> responseEntity;
-        if( product == null ){
-            //HttpStatus is enum stored in Spring Framework
-            responseEntity=new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            return responseEntity;
-        }
-        else return new ResponseEntity<>(product, HttpStatus.OK);
+////Earlier NULL Pointer Exception was handled in ProductController class ke method me hi. Now we will handle it in service class only.
+//        if( product == null ){
+//            //HttpStatus is enum stored in Spring Framework
+//            responseEntity=new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//            return responseEntity;
+//        }
+
+        return new ResponseEntity<>(product, HttpStatus.OK);
+
 
 
     }
@@ -81,4 +86,10 @@ public class ProductController {
         return productService.replaceProduct(id, product);
     }
     //replace Product->replace (PUT)
+
+    //making local exeption handler
+    @ExceptionHandler( FileNotFoundException.class )
+    public ResponseEntity<Void> handleFileNotFound(FileNotFoundException e){
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
 }
