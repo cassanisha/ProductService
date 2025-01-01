@@ -4,6 +4,7 @@ import com.scaler.dtos.FakeStoreProductDto;
 import com.scaler.exceptions.ProductNotFoundException;
 import com.scaler.models.Category;
 import com.scaler.models.Product;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpMessageConverterExtractor;
@@ -15,15 +16,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-@Service
+@Service("fkps")
 public class FakeStoreProductService implements ProductService {
     //REST TEMPLATE OBJECT IS NEEDED TO USE ITS METHODS
     private RestTemplate restTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
 
     //constructor D Inj
-    FakeStoreProductService(RestTemplate restTemplate){
+    FakeStoreProductService(RestTemplate restTemplate , RedisTemplate<String, Object> redisTemplate) {
         this.restTemplate=restTemplate;
+        this.redisTemplate=redisTemplate;
     }
+
     private Product convertFakeStoreProductDtoToProduct ( FakeStoreProductDto fsd ){
         Product product=new Product();
         product.setId(fsd.getId());
@@ -47,13 +51,19 @@ public class FakeStoreProductService implements ProductService {
         //Fakestore API will send a response in JSON. Here category class will be in string. DTO used
         //to recieve data from client to controller
         //to send data from controller to client
-
+//        Product product = (Product) redisTemplate.opsForHash().get("Products", "Products_"+id );
+//        if( product!=null){
+//            //cache hit
+//            return product;
+//        }
         FakeStoreProductDto fsd=restTemplate.getForObject("https://fakestoreapi.com/products/" + id, FakeStoreProductDto.class);
         //we are getting object as response where category is string. we want it to be an object.
         if( fsd==null ){
             throw new ProductNotFoundException(id,  "Product with id: "+id+" not found." );
         }
-        return convertFakeStoreProductDtoToProduct(fsd);
+        Product product=convertFakeStoreProductDtoToProduct(fsd);
+        //redisTemplate.opsForHash().put("Products", "Products_"+id, product);
+        return product;
     }
 
     @Override
