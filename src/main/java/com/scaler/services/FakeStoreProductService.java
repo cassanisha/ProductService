@@ -51,17 +51,17 @@ public class FakeStoreProductService implements ProductService {
         //Fakestore API will send a response in JSON. Here category class will be in string. DTO used
         //to recieve data from client to controller
         //to send data from controller to client
-//        Product product = (Product) redisTemplate.opsForHash().get("Products", "Products_"+id );
-//        if( product!=null){
-//            //cache hit
-//            return product;
-//        }
+        Product product = (Product) redisTemplate.opsForHash().get("Products", "Products_"+id );
+        if( product!=null){
+            //cache hit
+            return product;
+       }
         FakeStoreProductDto fsd=restTemplate.getForObject("https://fakestoreapi.com/products/" + id, FakeStoreProductDto.class);
         //we are getting object as response where category is string. we want it to be an object.
         if( fsd==null ){
             throw new ProductNotFoundException(id,  "Product with id: "+id+" not found." );
         }
-        Product product=convertFakeStoreProductDtoToProduct(fsd);
+        product=convertFakeStoreProductDtoToProduct(fsd);
         //redisTemplate.opsForHash().put("Products", "Products_"+id, product);
         return product;
     }

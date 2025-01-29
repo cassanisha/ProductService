@@ -1,19 +1,17 @@
 package com.scaler.controllers;
 
-import com.scaler.dtos.FakeStoreProductDto;
+import com.scaler.commons.AuthCommons;
+import com.scaler.dtos.UserDto;
 import com.scaler.exceptions.ProductNotFoundException;
 import com.scaler.models.Product;
-import com.scaler.services.FakeStoreProductService;
 import com.scaler.services.ProductService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.List;
 //localhost:8090/products request will reach here
 @RestController
@@ -21,31 +19,23 @@ import java.util.List;
 public class ProductController {
     private final RestTemplate restTemplate;
     private ProductService productService;
+    private AuthCommons authCommons;
     //constructor of product service
-    public ProductController(@Qualifier("fkps") ProductService productService, RestTemplate restTemplate) {
+    public ProductController(@Qualifier("sps") ProductService productService, RestTemplate restTemplate, AuthCommons authCommons) {
         this.productService = productService;
         this.restTemplate = restTemplate;
+        this.authCommons = authCommons;
     }
     //function of productController
-    //*********
-    /*@GetMapping("/{id}")
-    public Product getProductById(@PathVariable("id") Long id){
-        return productService.getProductById(id); //function of productService
-    }*/
-    //*********
     //ResponseEntity is a generic class that contains T type parameter, status codes, header files etc.
-    @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable("id") Long id) throws ProductNotFoundException {
+    @PostMapping("/{id}")
+    public ResponseEntity<Product> getProductById(@PathVariable("id") Long id, @RequestHeader("authToken") String token) throws ProductNotFoundException {
+        UserDto userDto= authCommons.validateToken(token);
+        if( userDto==null ){
+           return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
 
-        Product product=productService.getProductById(id); //method of productService
-        //declaring the generic class
-        ResponseEntity<Product> responseEntity;
-////Earlier NULL Pointer Exception was handled in ProductController class ke method me hi. Now we will handle it in service class only.
-//        if( product == null ){
-//            //HttpStatus is enum stored in Spring Framework
-//            responseEntity=new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-//            return responseEntity;
-//        }
+        Product product=productService.getProductById(id);
         return new ResponseEntity<>(product, HttpStatus.OK);
     }
 
